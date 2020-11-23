@@ -8,6 +8,7 @@ from scrapy import Selector
 class TedSpider(scrapy.Spider):
     name = "ted"
     start_urls = ["https://www.ted.com/topics"]
+    base_url = "https://www.ted.com"
 
     def parse(self, response):
         categories = response.css(".sa::attr('href')").getall()
@@ -15,7 +16,7 @@ class TedSpider(scrapy.Spider):
         for item in categories:
             category = item.split("/")[-1]
             time.sleep(2)
-            yield Request(f"https://www.ted.com/talks?topics%5B%5D={category}",
+            yield Request(f"{TedSpider.base_url}/talks?topics%5B%5D={category}",
                           headers=headers,
                           callback=self.parse_category_page,
                           cb_kwargs={"category": category})
@@ -36,7 +37,7 @@ class TedSpider(scrapy.Spider):
             yield {
                 "title": title,
                 "author": author,
-                "url": f"https://www.ted.com{url}",
+                "url": TedSpider.base_url + url,
                 "category": category,
                 "source": "ted"
             }

@@ -19,11 +19,14 @@ def fetch_category(driver, category, num_pages=5):
         video_list = driver.find_elements_by_class_name("iris_p_infinite__item")
         for item in video_list:
             title = item.find_element_by_class_name("iris_video-vital__title").text
+            author = item.find_element_by_class_name("iris_uservital-content").text
             url = item.find_element_by_class_name("iris_link-box").get_attribute('href')
             results.append({
                 "title": title,
+                "author": author,
                 "url": url,
-                "category": category
+                "category": category,
+                "source": "vimeo"
             })
     return results
 
@@ -47,7 +50,6 @@ def fetch():
     results = dict()
 
     for category in categories:
-        print(f"Fetching {category}")
         results[category] = fetch_category(driver, category)
 
     with open("./vimeo.json", "w") as f_out:
