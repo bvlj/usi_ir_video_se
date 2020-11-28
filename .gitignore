@@ -145,4 +145,4 @@ cython_debug/
 
 # Results
 *.json
-*/*.json
+crawler/*.json
