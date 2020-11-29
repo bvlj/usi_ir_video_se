@@ -7,14 +7,15 @@ from selenium.webdriver.firefox.options import Options
 def get_driver():
     options = Options()
     options.add_argument("-headless")
-    # TODO move this to env variable
     return webdriver.Firefox(executable_path="./geckodriver", options=options)
 
 
-def fetch_category(driver, category, num_pages=5):
+def fetch_category(driver, category, num_pages=10):
+    print(f"Fetching videos from the {category} category")
     results = []
 
     for i in range(1, num_pages + 1):
+        print(f"\tPage {i} / {num_pages}")
         driver.get(f"https://vimeo.com/categories/{category}/videos/page:{i}")
         video_list = driver.find_elements_by_class_name("iris_p_infinite__item")
         for item in video_list:
@@ -32,12 +33,15 @@ def fetch_category(driver, category, num_pages=5):
 
 
 def fetch_categories(driver):
-    results = dict()
+    results = []
     driver.get("https://vimeo.com/categories")
-    categories_list = driver.find_elements_by_class_name("category_cell_title_link")
-    for item in categories_list:
-        category = item.get_attribute("href").split("/")[-1]
-        results[category] = fetch_category(driver, category)
+    categories_list_elements = driver.find_elements_by_class_name("category_cell_title_link")
+    categories = []
+    for item in categories_list_elements:
+        categories.append(item.get_attribute("href").split("/")[-1])
+
+    for category in categories:
+        results.extend(fetch_category(driver, category))
 
     return results
 
@@ -46,11 +50,7 @@ def fetch():
     driver = get_driver()
     driver.set_page_load_timeout(60)
 
-    categories = fetch_categories(driver)
-    results = dict()
-
-    for category in categories:
-        results[category] = fetch_category(driver, category)
+    results = fetch_categories(driver)
 
     with open("./vimeo.json", "w") as f_out:
         json.dump(results, f_out)
