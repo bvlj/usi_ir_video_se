@@ -47,7 +47,7 @@ export default class Home extends React.Component {
         return (
             <div className="container">
                 <div className="search_container">
-                    <h1 className="logo">Video Search Engine</h1>
+                    <h1 className="logo">OK Video</h1>
                     <SearchBox onChanged={this.onUserSearch}/>
                 </div>
 

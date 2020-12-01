@@ -1,7 +1,7 @@
 import {FontIcon} from "office-ui-fabric-react/lib/Icon";
 import React from "react";
 
-export default function (onColumnClick) {
+export default function Columns(onColumnClick) {
     return [
         {
             key: "column0",
