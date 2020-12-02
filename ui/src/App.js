@@ -1,10 +1,11 @@
 import React from 'react';
 
 import {BrowserRouter, Route, Switch} from "react-router-dom";
-import { initializeIcons } from '@fluentui/react/lib/Icons';
+import {initializeIcons} from '@fluentui/react/lib/Icons';
 
-import Home from "./view/home/Home";
-import Channel from "./view/channel/Channel";
+import Channel from "./view/Channel";
+import FourZeroFour from "./view/FourZeroFour";
+import Home from "./view/Home";
 
 export default class App extends React.Component {
 
@@ -21,18 +22,15 @@ export default class App extends React.Component {
                         component={Home}
                         exact
                         path="/"/>
-                </Switch>
-                <Switch>
                     <Route
                         component={Channel}
                         exact
                         path="/:query"/>
-                </Switch>
-                <Switch>
                     <Route
                         component={Channel}
                         exact
                         path="/:query/:filter"/>
+                    <Route component={FourZeroFour}/>
                 </Switch>
             </BrowserRouter>
         )

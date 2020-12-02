@@ -1,8 +1,8 @@
 import React from 'react';
 
-import ChannelsList from "../components/ChannelsList";
-import SearchBar from "../components/SearchBar";
-import HomePresenter from "../../presenter/HomePresenter";
+import ChannelsList from "./components/ChannelsList";
+import SearchBar from "./components/SearchBar";
+import HomePresenter from "../presenter/HomePresenter";
 
 export default class Home extends React.Component {
 

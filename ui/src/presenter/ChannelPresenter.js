@@ -1,7 +1,7 @@
 import axios from "axios";
 import {extract as extractKeyWords} from "keyword-extractor";
 
-import {QUERY_BASE_URL} from "../config";
+import {QUERY_BASE_URL, SUGGEST_BASE_URL} from "../config";
 import {channelsList} from "../model/Channels";
 
 const PSEUDO_RELEVANCE_LIMIT = 5
@@ -10,10 +10,33 @@ export default class ChannelPresenter {
 
     constructor() {
         this.queryUrl = QUERY_BASE_URL;
+        this.suggestUrl = SUGGEST_BASE_URL;
     }
 
     getChannel(link) {
         return channelsList.find(channel => channel.link === link);
+    }
+
+    getSuggestions(query) {
+        const url = `${this.suggestUrl}${query.replaceAll(" ", "%20")}`;
+        return axios.post(url, {}, {})
+            .then(res => {
+                if (!res.data || !res.data.suggest ||
+                    !res.data.suggest.mainSuggester) {
+                    throw Error();
+                }
+                const suggester = res.data.suggest.mainSuggester;
+                const keys = Object.keys(suggester);
+                if (keys.length === 0 || !suggester[keys].suggestions) {
+                    throw Error();
+                }
+                return suggester[keys].suggestions.map(it => this.sanitize(it.term))
+                    .filter(it => it.replaceAll(" ", "").toLowerCase() !== query.replaceAll(" ", "").toLowerCase());
+            })
+            .catch(err => {
+                console.error(err);
+                return [];
+            })
     }
 
     getVideosFromTopics(topics, limit) {

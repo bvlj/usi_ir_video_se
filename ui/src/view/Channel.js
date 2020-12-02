@@ -4,9 +4,10 @@ import {DetailsList, DetailsListLayoutMode, SelectionMode,} from 'office-ui-fabr
 import {FontIcon} from "office-ui-fabric-react/lib/Icon";
 import {SearchBox} from "office-ui-fabric-react/lib/SearchBox";
 
-import ChannelPresenter from "../../presenter/ChannelPresenter";
-import ColumnsManager from "./ColumnsManager";
-import SearchBar from "../components/SearchBar";
+import ChannelPresenter from "../presenter/ChannelPresenter";
+import ColumnsManager from "./channel/ColumnsManager";
+import SearchBar from "./components/SearchBar";
+import {Link} from "office-ui-fabric-react/lib/Link";
 
 export default class Channel extends React.Component {
 
@@ -23,9 +24,9 @@ export default class Channel extends React.Component {
         this.state = {
             channel: {name: "", icon: ""},
             columns: columnsManager.getDefaultColumns(),
-            hints: [],
-            limit: 100,
             filter: "",
+            limit: 20,
+            suggestions: [],
             videos: [],
         }
     }
@@ -35,23 +36,33 @@ export default class Channel extends React.Component {
         const {query, filter} = params;
         const channel = this.presenter.getChannel(query);
 
+        this.setState({
+            filter: filter,
+        });
+
+        // Load videos
         if (channel) {
             this.onLoadChannel(channel, filter)
         } else {
             this.onLoadQuery(query, filter);
         }
+
+        // Load suggestions
+        this.presenter.getSuggestions(channel ? channel.name : query)
+            .then(suggestions => this.setState({
+                suggestions: suggestions,
+            }));
     }
 
-    onLoadChannel = (channel, filter) => {
+    onLoadChannel = (channel) => {
         this.presenter.getVideosFromTopics(channel.topics, this.state.limit)
             .then(videos => this.setState({
                 channel: channel,
-                filter: filter,
                 videos: videos,
             }))
     }
 
-    onLoadQuery = (query, filter) => {
+    onLoadQuery = (query) => {
         const channel = {
             name: query,
             link: query,
@@ -60,7 +71,6 @@ export default class Channel extends React.Component {
         this.presenter.getVideosFromQuery(query, this.state.limit)
             .then(videos => this.setState({
                 channel: channel,
-                filter: filter,
                 videos: videos,
             }))
     }
@@ -153,6 +163,20 @@ export default class Channel extends React.Component {
                             setKey="multiple"/>
                 }
 
+                {
+                    this.state.suggestions.length === 0 ?
+                        <div/> :
+                        <div className="centered_container">
+                            <span>Try searching one of these: </span>
+                            {
+                                this.state.suggestions.map(it =>
+                                    <Link
+                                        style={{marginRight: 8}}
+                                        href={`/${it}`}>{it}</Link>
+                                )
+                            }
+                        </div>
+                }
             </div>
         );
     }
