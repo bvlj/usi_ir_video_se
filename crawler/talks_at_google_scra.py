@@ -27,6 +27,7 @@ class TalksAtGoogleSpider(scrapy.Spider):
                 video = Selector(text=video)
             title = video.xpath("//div/div[2]/div/h5//text()").extract_first()
             author = video.xpath("//div/div[2]/div/h4//text()").extract_first()
+            image = video.css(".card-image::attr('data-imgsrc')").extract_first()
             url = video.xpath("//@href").extract_first()
 
             if title is None:
@@ -37,6 +38,7 @@ class TalksAtGoogleSpider(scrapy.Spider):
                 "title": title,
                 "author": author,
                 "url": f"https://talksat.withgoogle.com{url}",
+                "image": image,
                 "category": category,
                 "source": "talks_at_google"
             }

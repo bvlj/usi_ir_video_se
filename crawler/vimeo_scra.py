@@ -33,10 +33,12 @@ class VimeoSpider(scrapy.Spider):
 
             title = video.xpath("//a/div[2]/h5/span//text()").extract_first()
             author = video.xpath("//div//text()").extract_first()
+            image = video.css(".iris_thumbnail div img::attr('src')").extract_first()
             url = video.xpath("//a/@href").extract_first()
             yield {
                 "title": title,
                 "author": author,
+                "image": image,
                 "url": url,
                 "category": category,
                 "source": VimeoSpider.name

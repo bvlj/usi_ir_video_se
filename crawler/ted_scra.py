@@ -32,12 +32,14 @@ class TedSpider(scrapy.Spider):
             title = video.xpath("//div/div[2]/h4[2]/a//text()").extract_first()
             author = video.xpath("//div/div[2]/h4[1]//text()").extract_first()
             title = title.replace("\n", "")
+            image = video.css(".thumb__image::attr('src')").extract_first()
             url = video.css(".ga-link::attr('href')").extract_first()
 
             yield {
                 "title": title,
                 "author": author,
                 "url": TedSpider.base_url + url,
+                "image": image,
                 "category": category,
                 "source": "ted"
             }

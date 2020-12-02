@@ -21,14 +21,17 @@ def fetch_category(driver, category, num_pages=10):
         for item in video_list:
             title = item.find_element_by_class_name("iris_video-vital__title").text
             author = item.find_element_by_class_name("iris_uservital-content").text
+            image = item.find_element_by_css_selector(".iris_thumbnail div img").get_attribute('src')
             url = item.find_element_by_class_name("iris_link-box").get_attribute('href')
             results.append({
                 "title": title,
                 "author": author,
+                "image": image,
                 "url": url,
                 "category": category,
                 "source": "vimeo"
             })
+    print(results)
     return results
 
 

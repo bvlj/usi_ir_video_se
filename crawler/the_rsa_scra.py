@@ -31,21 +31,23 @@ class TheRsaSpider(scrapy.Spider):
 
 
     def parse_category_page(self, response, category):
-        video_list = response.css("#contentHolder li div div .text div").getall()
+        video_list = response.css("#contentHolder li .promoBlock .promoBlockWrap").getall()
         print(f"Found {len(video_list)} videos")
 
         for video in video_list:
             if isinstance(video, str):
                 video = Selector(text=video)
-            
-            title = video.xpath("//h3/a//text()").extract_first()
+
+            title = video.css(".text .textWrap h3 a::text").extract_first()
             title = title.strip().replace("\r", "").replace("\n", "")
-            url = video.xpath("//h3/a/@href").extract_first()
+            url = video.css(".text .textWrap h3 a::attr('href')").extract_first()
+            image = video.css(".image a img::attr('src')").extract_first()
 
             yield {
                 "title": title,
                 "author": "",
                 "url": TheRsaSpider.base_url + url,
+                "image": TheRsaSpider.base_url + image,
                 "category": category,
                 "source": TheRsaSpider.name
             }
