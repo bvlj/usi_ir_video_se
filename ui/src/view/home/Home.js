@@ -1,7 +1,7 @@
 import React from 'react';
 
-import {SearchBox} from 'office-ui-fabric-react/lib/SearchBox';
-import {List} from 'office-ui-fabric-react/lib/List';
+import ChannelsList from "../components/ChannelsList";
+import SearchBar from "../components/SearchBar";
 import HomePresenter from "../../presenter/HomePresenter";
 
 export default class Home extends React.Component {
@@ -9,51 +9,37 @@ export default class Home extends React.Component {
     constructor(props) {
         super(props);
 
-        this.presenter = new HomePresenter();
         this.state = {
-            categories: [],
-            userQuery: "",
+            channels: [],
         };
     }
 
     componentDidMount() {
-        this.presenter.getCategories()
-            .then(categories => this.setState({categories: categories}));
+        const channels = new HomePresenter().getChannels();
+        this.setState({channels: channels});
     }
 
-    onUserSearch = (query) => {
-        this.setState({userQuery: query});
-    }
-
-    onRenderCell = (item) => {
-        return (
-            <a href={`/c/${item.name}`}>
-                <div className="category_item" data-is-focusable={true}>{item.name}</div>
-            </a>
-        )
-    }
-
-    filterByUserQuery = (items) => {
-        const q = this.state.userQuery;
-        console.log(q);
-        if (q === "") {
-            return items;
-        }
-        const regex = new RegExp(q, "i");
-        return items.filter(it => regex.test(it.name));
+    onSearch = (query) => {
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = `/${query}`
+        a.click();
+        a.remove();
     }
 
     render() {
         return (
             <div className="container">
-                <div className="search_container">
+                <div className="centered_container">
                     <h1 className="logo">OK Video</h1>
-                    <SearchBox onChanged={this.onUserSearch}/>
+
+                    <SearchBar
+                        hint="What are you watching today?"
+                        onSearch={this.onSearch}/>
                 </div>
 
-                <List
-                    items={this.filterByUserQuery(this.state.categories)}
-                    onRenderCell={this.onRenderCell}/>
+                <ChannelsList
+                    channels={this.state.channels}/>
             </div>
         )
     }
