@@ -89,6 +89,7 @@ export default class ChannelPresenter {
     mapToVideoObject = (it) => {
         return {
             author: it.author ? it.author : "",
+            image: it.image,
             source: this.firstUpperCase(this.sanitize(it.source)),
             title: it.title,
             topic: this.firstUpperCase(this.sanitize(it.category)),

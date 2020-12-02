@@ -1,5 +1,3 @@
-import {FontIcon} from "office-ui-fabric-react/lib/Icon";
-
 export default class ColumnsManager {
 
     constructor(callback) {
@@ -38,6 +36,23 @@ export default class ColumnsManager {
         return [
             {
                 key: "column0",
+                name: "Open video",
+                fieldName: "url",
+                ariaLabel: "View the video",
+                maxWidth: 250,
+                minWidth: 250,
+                iconName: "",
+                isPadded: true,
+                isIconOnly: true,
+                isResizable: false,
+                onRender: (item) => {
+                    return <a href={item.url} target="_blank" rel="noopener noreferrer">
+                        <img className="thumbnail" src={item.image} alt={item.title}/>
+                    </a>
+                }
+            },
+            {
+                key: "column1",
                 name: "Title",
                 fieldName: "title",
                 ariaLabel: "Video title",
@@ -54,7 +69,7 @@ export default class ColumnsManager {
                 onColumnClick: this.onColumnClick,
             },
             {
-                key: "column1",
+                key: "column2",
                 name: "Author",
                 fieldName: "author",
                 ariaLabel: "Video author",
@@ -71,7 +86,7 @@ export default class ColumnsManager {
                 onColumnClick: this.onColumnClick,
             },
             {
-                key: "column2",
+                key: "column3",
                 name: "Topic",
                 fieldName: "topic",
                 ariaLabel: "Video topic",
@@ -88,7 +103,7 @@ export default class ColumnsManager {
                 onColumnClick: this.onColumnClick,
             },
             {
-                key: "column3",
+                key: "column4",
                 name: "Source",
                 fieldName: "source",
                 ariaLabel: "Video source",
@@ -104,22 +119,6 @@ export default class ColumnsManager {
                 sortDescendingAriaLabel: "Z - A",
                 onColumnClick: this.onColumnClick,
             },
-            {
-                key: "column4",
-                name: "Open video",
-                fieldName: "url",
-                ariaLabel: "View the video",
-                minWidth: 50,
-                iconName: "",
-                isPadded: true,
-                isIconOnly: true,
-                isResizable: false,
-                onRender: (item) => {
-                    return <a href={item.url} target="_blank" rel="noopener noreferrer">
-                        <FontIcon iconName="MSNVideos"/>
-                    </a>
-                }
-            }
         ]
     }
 }

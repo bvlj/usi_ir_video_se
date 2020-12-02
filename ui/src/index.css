@@ -86,6 +86,11 @@ h1, code {
     margin-right: 0.67em;
 }
 
+.thumbnail {
+    width: 250px;
+    min-height: 141px;
+}
+
 @media screen and (max-width: 576px) {
     .container {
         max-width: 98vw;

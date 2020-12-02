@@ -171,7 +171,7 @@ export default class Channel extends React.Component {
                             {
                                 this.state.suggestions.map(it =>
                                     <Link
-                                        style={{marginRight: 8}}
+                                        style={{marginRight: 16}}
                                         href={`/${it}`}>{it}</Link>
                                 )
                             }
