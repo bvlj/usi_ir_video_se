@@ -2,94 +2,104 @@ export const channelsList = [
     {
         link: "a",
         name: "Art",
-        icon: "PictureFill",
+        icon: "/icons/art.svg",
         topics: [
             "art",
             "creativity",
-        ]
+        ],
+        exclude: [],
     },
     {
         link: "e",
         name: "Economy",
-        icon: "Money",
+        icon: "/icons/money.svg",
         topics: [
-            "market",
             "econom",
-        ]
+        ],
+        exclude: [],
     },
     {
         link: "f",
         name: "Food",
-        icon: "EatDrink",
+        icon: "/icons/food.svg",
         topics: [
             "food",
             "cook",
-        ]
+        ],
+        exclude: [],
     },
     {
         link: "h",
         name: "Health & Fitness",
-        icon: "HealthSolid",
+        icon: "/icons/health.svg",
         topics: [
             "health",
             "fitness",
-        ]
+        ],
+        exclude: [],
     },
     {
         link: "l",
         name: "Literature",
-        icon: "ReadingMode",
+        icon: "/icons/books.svg",
         topics: [
             "book",
-        ]
+        ],
+        exclude: [],
     },
     {
         link: "j",
         name: "News & Journalism",
-        icon: "News",
+        icon: "/icons/news.svg",
         topics: [
             "news",
             "journalism",
-        ]
+        ],
+        exclude: [],
     },
     {
         link: "m",
         name: "Music",
-        icon: "MusicNote",
+        icon: "/icons/music.svg",
         topics: [
             "music",
-        ]
+        ],
+        exclude: [],
     },
     {
         link: "n",
         name: "Animals & Nature",
-        icon: "Cat",
+        icon: "/icons/animals.svg",
         topics: [
             "animal",
             "natur",
-            "agricultur",
-        ]
+        ],
+        exclude: [
+            "-animation",
+        ],
     },
     {
         link: "o",
         name: "Sports",
-        icon: "MoreSports",
+        icon: "/icons/sport.svg",
         topics: [
             "sport",
-        ]
+        ],
+        exclude: [],
     },
     {
         link: "p",
         name: "Politics",
-        icon: "People",
+        icon: "/icons/election.svg",
         topics: [
             "polit",
-        ]
+        ],
+        exclude: [],
     },
     {
         link: "s",
         name: "Science",
-        icon: "TestBeakerSolid",
+        icon: "/icons/science.svg",
         topics: [
             "scienc",
             "biologi",
@@ -97,16 +107,18 @@ export const channelsList = [
             "space",
             "medic",
             "physic",
-        ]
+        ],
+        exclude: [],
     },
     {
         link: "t",
         name: "Technology",
-        icon: "PC1",
+        icon: "/icons/technology.svg",
         topics: [
             "technolog",
             "comput",
             "web",
-        ]
+        ],
+        exclude: [],
     }
 ]

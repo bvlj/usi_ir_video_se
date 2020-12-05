@@ -1,13 +1,12 @@
 import React from 'react';
 
-import {DetailsList, DetailsListLayoutMode, SelectionMode,} from 'office-ui-fabric-react/lib/DetailsList';
-import {FontIcon} from "office-ui-fabric-react/lib/Icon";
-import {SearchBox} from "office-ui-fabric-react/lib/SearchBox";
+import {DetailsList, DetailsListLayoutMode, SelectionMode,} from '@fluentui/react/lib/DetailsList';
+import {Link} from "@fluentui/react/lib/Link";
+import {SearchBox} from "@fluentui/react/lib/SearchBox";
 
 import ChannelPresenter from "../presenter/ChannelPresenter";
 import ColumnsManager from "./channel/ColumnsManager";
 import SearchBar from "./components/SearchBar";
-import {Link} from "office-ui-fabric-react/lib/Link";
 
 export default class Channel extends React.Component {
 
@@ -25,7 +24,8 @@ export default class Channel extends React.Component {
             channel: {name: "", icon: ""},
             columns: columnsManager.getDefaultColumns(),
             filter: "",
-            limit: 20,
+            limit: 400,
+            searchQuery: "",
             suggestions: [],
             videos: [],
         }
@@ -45,17 +45,17 @@ export default class Channel extends React.Component {
             this.onLoadChannel(channel, filter)
         } else {
             this.onLoadQuery(query, filter);
-        }
 
-        // Load suggestions
-        this.presenter.getSuggestions(channel ? channel.name : query)
-            .then(suggestions => this.setState({
-                suggestions: suggestions,
-            }));
+            // Load suggestions
+            this.presenter.getSuggestions(channel ? channel.name : query)
+                .then(suggestions => this.setState({
+                    suggestions: suggestions,
+                }));
+        }
     }
 
     onLoadChannel = (channel) => {
-        this.presenter.getVideosFromTopics(channel.topics, this.state.limit)
+        this.presenter.getVideosFromChannel(channel, this.state.limit)
             .then(videos => this.setState({
                 channel: channel,
                 videos: videos,
@@ -63,14 +63,19 @@ export default class Channel extends React.Component {
     }
 
     onLoadQuery = (query) => {
-        const channel = {
+        const topics = [];
+        const exclude = [];
+        query.split(" ").forEach(it => it.match(/^-.*/) ? exclude.push(it) : topics.push(it));
+        const queryChannel = {
             name: query,
-            link: query,
-            icon: "VideoSearch",
+            icon: "/icons/video.svg",
+            topics: topics,
+            exclude: exclude,
         };
-        this.presenter.getVideosFromQuery(query, this.state.limit)
+        this.presenter.getVideosFromQuery(queryChannel, this.state.limit)
             .then(videos => this.setState({
-                channel: channel,
+                channel: queryChannel,
+                searchQuery: query,
                 videos: videos,
             }))
     }
@@ -114,6 +119,15 @@ export default class Channel extends React.Component {
         }
     }
 
+    setSearchQuery = (channel) => {
+        if (!channel.link) {
+            return;
+        }
+        this.setState({
+            searchQuery: channel.link + "/",
+        });
+    }
+
     updateColumnsData = (data) => {
         this.setState({
             columns: data.columns,
@@ -129,17 +143,25 @@ export default class Channel extends React.Component {
 
                     <SearchBar
                         placeholder="Find more videos"
+                        value={this.state.searchQuery}
                         onSearch={this.onSearch}/>
 
                     <div
                         style={{marginTop: "2em"}}
                         className="horizontal channel_header">
-                        <FontIcon iconName={this.state.channel.icon}/>
-                        <h1>{this.state.channel.name}</h1>
+                        <a href="/">
+                            <img
+                                alt={this.state.channel.name}
+                                src={process.env.PUBLIC_URL + this.state.channel.icon}/>
+                        </a>
+                        <h1 onClick={() => this.setSearchQuery(this.state.channel)}>
+                            {this.state.channel.name}
+                            {this.state.channel.link ? <span>{this.state.channel.link}/</span> : ""}
+                        </h1>
                     </div>
 
                     <SearchBox
-                        styles={{root: {width: "30vw"}}}
+                        className="search_filter"
                         iconProps={{iconName: "Filter"}}
                         placeholder="Filter"
                         value={this.state.filter}
@@ -163,20 +185,24 @@ export default class Channel extends React.Component {
                             setKey="multiple"/>
                 }
 
-                {
-                    this.state.suggestions.length === 0 ?
-                        <div/> :
-                        <div className="centered_container">
-                            <span>Try searching one of these: </span>
-                            {
-                                this.state.suggestions.map(it =>
-                                    <Link
-                                        style={{marginRight: 16}}
-                                        href={`/${it}`}>{it}</Link>
-                                )
-                            }
-                        </div>
-                }
+                <div className="centered_container">
+                    <p>Found {items.length} results.</p>
+
+                    {
+                        this.state.suggestions.length === 0 ?
+                            "" :
+                            <p>
+                                <span>Try searching one of these: </span>
+                                {
+                                    this.state.suggestions.map(it =>
+                                        <Link
+                                            key={`hint_${it}`}
+                                            style={{marginRight: 16}}
+                                            href={`/${it}`}>{it}</Link>)
+                                }
+                            </p>
+                    }
+                </div>
             </div>
         );
     }

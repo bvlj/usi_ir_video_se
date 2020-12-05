@@ -45,11 +45,9 @@ export default class ColumnsManager {
                 isPadded: true,
                 isIconOnly: true,
                 isResizable: false,
-                onRender: (item) => {
-                    return <a href={item.url} target="_blank" rel="noopener noreferrer">
-                        <img className="thumbnail" src={item.image} alt={item.title}/>
-                    </a>
-                }
+                onRender: (item) => <a href={item.url} target="_blank" rel="noopener noreferrer">
+                    <img className="thumbnail" src={item.image} alt={item.title}/>
+                </a>
             },
             {
                 key: "column1",
@@ -57,7 +55,6 @@ export default class ColumnsManager {
                 fieldName: "title",
                 ariaLabel: "Video title",
                 minWidth: 260,
-                maxWidth: 400,
                 data: "string",
                 isPadded: true,
                 isRowHeader: true,
@@ -74,7 +71,6 @@ export default class ColumnsManager {
                 fieldName: "author",
                 ariaLabel: "Video author",
                 minWidth: 200,
-                maxWidth: 350,
                 data: "string",
                 isPadded: true,
                 isRowHeader: true,
@@ -91,7 +87,6 @@ export default class ColumnsManager {
                 fieldName: "topic",
                 ariaLabel: "Video topic",
                 minWidth: 150,
-                maxWidth: 350,
                 data: "string",
                 isPadded: true,
                 isRowHeader: true,
@@ -102,6 +97,7 @@ export default class ColumnsManager {
                 sortDescendingAriaLabel: "Z - A",
                 onColumnClick: this.onColumnClick,
             },
+            /*
             {
                 key: "column4",
                 name: "Source",
@@ -119,6 +115,7 @@ export default class ColumnsManager {
                 sortDescendingAriaLabel: "Z - A",
                 onColumnClick: this.onColumnClick,
             },
+             */
         ]
     }
 }

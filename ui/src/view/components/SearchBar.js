@@ -1,7 +1,7 @@
 import React from 'react';
 
-import {PrimaryButton} from 'office-ui-fabric-react/lib/Button';
-import {SearchBox} from 'office-ui-fabric-react/lib/SearchBox';
+import {PrimaryButton} from '@fluentui/react/lib/Button';
+import {SearchBox} from '@fluentui/react/lib/SearchBox';
 
 export default class SearchBar extends React.Component {
 
@@ -9,12 +9,16 @@ export default class SearchBar extends React.Component {
         super(props);
 
         this.state = {
+            userInput: false,
             query: ""
         };
     }
 
     onQueryChanged = (query) => {
-        this.setState({query: query});
+        this.setState({
+            userInput: true,
+            query: query
+        });
     }
 
     onSearch = () => {
@@ -31,6 +35,7 @@ export default class SearchBar extends React.Component {
                 <SearchBox
                     className="search_bar"
                     placeholder={this.props.hint}
+                    value={this.state.userInput ? this.state.query : this.props.value}
                     onChanged={this.onQueryChanged}
                     onSearch={this.onSearch}/>
                 <PrimaryButton

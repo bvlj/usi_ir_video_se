@@ -18,7 +18,7 @@ export default class ChannelPresenter {
     }
 
     getSuggestions(query) {
-        const url = `${this.suggestUrl}${query.replaceAll(" ", "%20")}`;
+        const url = `${this.suggestUrl}${query}`;
         return axios.post(url, {}, {})
             .then(res => {
                 if (!res.data || !res.data.suggest ||
@@ -30,8 +30,9 @@ export default class ChannelPresenter {
                 if (keys.length === 0 || !suggester[keys].suggestions) {
                     throw Error();
                 }
+                const queryLc = query.replaceAll(" ", "").toLowerCase();
                 return suggester[keys].suggestions.map(it => this.sanitize(it.term))
-                    .filter(it => it.replaceAll(" ", "").toLowerCase() !== query.replaceAll(" ", "").toLowerCase());
+                    .filter(it => it.replaceAll(" ", "").toLowerCase() !== queryLc);
             })
             .catch(err => {
                 console.error(err);
@@ -39,17 +40,16 @@ export default class ChannelPresenter {
             })
     }
 
-    getVideosFromTopics(topics, limit) {
-        let url = `${this.queryUrl}q=`;
-        topics.forEach(topic => url += `category:${topic}%20OR%20`);
-        url = url.substring(0, url.length - 8); // Remove the last " OR "
-        url += `&rows=${limit}`;
-
+    getVideosFromChannel(channel, limit) {
+        const topics = channel.topics.map(it => `${it}*`).join(" OR ");
+        const exclude = channel.exclude.join(" ");
+        const url = `${this.queryUrl}q=${topics} ${exclude}&rows=${limit}`;
         return this.getVideos(url);
     }
 
-    getVideosFromQuery(query, limit) {
-        const url = `${this.queryUrl}q=${query.replaceAll(" ", "%20")}&fl=title&rows=${PSEUDO_RELEVANCE_LIMIT}`;
+    getVideosFromQuery(queryChannel, limit) {
+        const query = queryChannel.topics.join(" ");
+        const url = `${this.queryUrl}q=${query}&fl=title&rows=${PSEUDO_RELEVANCE_LIMIT}`;
 
         return axios.post(url, {}, {})
             .then(res => {
@@ -57,7 +57,7 @@ export default class ChannelPresenter {
                     !res.data.response.docs) {
                     throw Error()
                 }
-                return this.getRelevantVideos(res.data.response.docs, limit);
+                return this.getRelevantVideos(res.data.response.docs, queryChannel.exclude, limit);
             })
             .catch(err => {
                 console.error(err);
@@ -65,9 +65,12 @@ export default class ChannelPresenter {
             });
     }
 
-    getRelevantVideos(originalResults, limit) {
-        const keywords = this.extractKeywords(originalResults.map(video => video.title));
-        const url = `${this.queryUrl}q=${keywords.slice(0, 8).join(" ")}&rows=${limit}`;
+    getRelevantVideos(originalResults, excludeList, limit) {
+        const keywords = this.extractKeywords(originalResults.map(video => video.title))
+            .slice(0, 8)
+            .join(" ");
+        const excluded = excludeList.join(" ");
+        const url = `${this.queryUrl}q=${keywords} ${excluded}&rows=${limit}`;
         return this.getVideos(url);
     }
 
@@ -86,22 +89,18 @@ export default class ChannelPresenter {
             });
     }
 
-    mapToVideoObject = (it) => {
-        return {
-            author: it.author ? it.author : "",
-            image: it.image,
-            source: this.firstUpperCase(this.sanitize(it.source)),
-            title: it.title,
-            topic: this.firstUpperCase(this.sanitize(it.category)),
-            url: it.url,
-        }
-    }
-
     extractVideos = (list) => {
         const obj = {};
         // Convert and make unique by "title+author" (some videos may appear multiple times)
         list.forEach(it => {
-            const video = this.mapToVideoObject(it);
+            const video = {
+                author: it.author ? it.author : "",
+                image: it.image,
+                source: this.firstUpperCase(this.sanitize(it.source)),
+                title: it.title,
+                topic: this.firstUpperCase(this.sanitize(it.category)),
+                url: it.url,
+            };
             const key = video.title + video.author
             if (!obj[key]) {
                 obj[key] = video;

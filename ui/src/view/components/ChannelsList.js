@@ -1,8 +1,7 @@
 import React from 'react';
 
-import {FocusZone} from 'office-ui-fabric-react/lib/FocusZone';
-import {FontIcon} from "office-ui-fabric-react/lib/Icon";
-import {Link} from 'office-ui-fabric-react/lib/Link';
+import {FocusZone} from '@fluentui/react/lib/FocusZone';
+import {Link} from '@fluentui/react/lib/Link';
 
 
 export default class ChannelsList extends React.Component {
@@ -17,9 +16,10 @@ export default class ChannelsList extends React.Component {
                                 className="item"
                                 key={`channel_${it.link}`}
                                 href={`/${it.link}`}>
-                                <FontIcon
+                                <img
+                                    alt={it.name}
                                     className="icon"
-                                    iconName={it.icon}/>
+                                    src={process.env.PUBLIC_URL + it.icon}/>
                                 <span className="label">{it.name}</span>
                             </Link>
                         )
