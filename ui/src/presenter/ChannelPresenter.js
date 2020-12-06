@@ -40,14 +40,14 @@ export default class ChannelPresenter {
             })
     }
 
-    getVideosFromChannel(channel, limit) {
+    getVideosFromChannel(channel, limit = 400) {
         const topics = channel.topics.map(it => `${it}*`).join(" OR ");
         const exclude = channel.exclude.join(" ");
         const url = `${this.queryUrl}q=${topics} ${exclude}&rows=${limit}`;
         return this.getVideos(url);
     }
 
-    getVideosFromQuery(queryChannel, limit) {
+    getVideosFromQuery(queryChannel, limit = 400) {
         const query = queryChannel.topics.join(" ");
         const url = `${this.queryUrl}q=${query}&fl=title&rows=${PSEUDO_RELEVANCE_LIMIT}`;
 

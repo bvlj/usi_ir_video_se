@@ -1,49 +1,35 @@
-import React from 'react';
+import {useEffect, useState} from 'react';
 
 import FourZeroFourPresenter from "../presenter/FourZeroFourPresenter";
 import ChannelsList from "./components/ChannelsList";
 import SearchBar from "./components/SearchBar";
+import {openUrl} from "../util/Navigation";
 
-export default class FourZeroFour extends React.Component {
+export default function FourZeroFour() {
 
-    constructor(props) {
-        super(props);
+    const [suggestions, setSuggestions] = useState([]);
 
-        this.state = {
-            suggestions: [],
-        };
-    }
+    useEffect(() => {
+        const presenter = new FourZeroFourPresenter();
+        const suggestions = presenter.getSuggestions();
+        setSuggestions(suggestions);
+    }, []);
 
-    componentDidMount() {
-        const suggestions = new FourZeroFourPresenter().getSuggestions();
-        this.setState({suggestions: suggestions});
-    }
+    return (
+        <div className="container">
+            <div className="centered_container">
+                <h1 className="logo">(Not) Ok Video</h1>
+                <h3>Error 404 • It looks like the resource you're trying to access does not exist</h3>
 
-    onSearch = (query) => {
-        const a = document.createElement("a");
-        a.style.display = "none";
-        a.href = `/${query}`
-        a.click();
-        a.remove();
-    }
-
-    render() {
-        return (
-            <div className="container">
-                <div className="centered_container">
-                    <h1 className="logo">(Not) Ok Video</h1>
-                    <h3>Error 404 • It looks like the resource you're trying to access does not exist</h3>
-
-                    <SearchBar
-                        hint="Let's get back on track"
-                        onSearch={this.onSearch}/>
-                </div>
-
-                <h2>Or find some inspiration:</h2>
-
-                <ChannelsList
-                    channels={this.state.suggestions}/>
+                <SearchBar
+                    hint="Let's get back on track"
+                    onSearch={query => openUrl(`/${query}`)}/>
             </div>
-        )
-    }
+
+            <h2>Or find some inspiration:</h2>
+
+            <ChannelsList
+                channels={suggestions}/>
+        </div>
+    )
 }

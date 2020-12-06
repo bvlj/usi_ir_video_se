@@ -146,3 +146,8 @@ cython_debug/
 # Results
 *.json
 crawler/*.json
+
+# Mac
+.DS_Store
+/*/.DS_Store
+/*/*/.DS_Store

@@ -1,48 +1,36 @@
-import React from 'react';
+import {useState} from 'react';
 
 import {PrimaryButton} from '@fluentui/react/lib/Button';
 import {SearchBox} from '@fluentui/react/lib/SearchBox';
 
-export default class SearchBar extends React.Component {
+export default function SearchBar(props) {
 
-    constructor(props) {
-        super(props);
+    const [hasUserInput, setHasUserInput] = useState(false);
+    const [query, setQuery] = useState("");
 
-        this.state = {
-            userInput: false,
-            query: ""
-        };
-    }
+    const onQueryChanged = (query) => {
+        setHasUserInput(true);
+        setQuery(query);
+    };
 
-    onQueryChanged = (query) => {
-        this.setState({
-            userInput: true,
-            query: query
-        });
-    }
-
-    onSearch = () => {
-        const query = this.state.query
-            .replaceAll("//", "/") // Even number of slashes
-            .replaceAll("//", "/") // Odd number of slashes
+    const onSearch = () => {
+        const searchQuery = query.replaceAll(/(\/\/\/)|(\/\/)/g, "/")
             .replaceAll(/^\/|\/$/g, ""); // begin + end slashes
-        this.props.onSearch(query);
+        props.onSearch(searchQuery);
     }
 
-    render() {
-        return (
-            <div className="horizontal">
-                <SearchBox
-                    className="search_bar"
-                    placeholder={this.props.hint}
-                    value={this.state.userInput ? this.state.query : this.props.value}
-                    onChanged={this.onQueryChanged}
-                    onSearch={this.onSearch}/>
-                <PrimaryButton
-                    className="search_button"
-                    onClick={this.onSearch}
-                    text="Search"/>
-            </div>
-        )
-    }
+    return (
+        <div className="horizontal">
+            <SearchBox
+                className="search_bar"
+                placeholder={props.hint}
+                value={hasUserInput ? query : props.value}
+                onChanged={onQueryChanged}
+                onSearch={onSearch}/>
+            <PrimaryButton
+                className="search_button"
+                onClick={onSearch}
+                text="Search"/>
+        </div>
+    )
 }

@@ -1,46 +1,32 @@
-import React from 'react';
+import {useEffect, useState} from 'react';
 
 import ChannelsList from "./components/ChannelsList";
 import SearchBar from "./components/SearchBar";
 import HomePresenter from "../presenter/HomePresenter";
+import {openUrl} from "../util/Navigation";
 
-export default class Home extends React.Component {
+export default function Home() {
 
-    constructor(props) {
-        super(props);
+    const [channels, setChannels] = useState([]);
 
-        this.state = {
-            channels: [],
-        };
-    }
+    useEffect(() => {
+        const presenter = new HomePresenter();
+        const channels = presenter.getChannels();
+        setChannels(channels);
+    }, []);
 
-    componentDidMount() {
-        const channels = new HomePresenter().getChannels();
-        this.setState({channels: channels});
-    }
+    return (
+        <div className="container">
+            <div className="centered_container">
+                <h1 className="logo">OK Video</h1>
 
-    onSearch = (query) => {
-        const a = document.createElement("a");
-        a.style.display = "none";
-        a.href = `/${query}`
-        a.click();
-        a.remove();
-    }
-
-    render() {
-        return (
-            <div className="container">
-                <div className="centered_container">
-                    <h1 className="logo">OK Video</h1>
-
-                    <SearchBar
-                        hint="What are you watching today?"
-                        onSearch={this.onSearch}/>
-                </div>
-
-                <ChannelsList
-                    channels={this.state.channels}/>
+                <SearchBar
+                    hint="What are you watching today?"
+                    onSearch={(query) => openUrl(`/${query}`)}/>
             </div>
-        )
-    }
+
+            <ChannelsList
+                channels={channels}/>
+        </div>
+    )
 }

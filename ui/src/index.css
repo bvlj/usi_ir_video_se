@@ -102,11 +102,6 @@ h1, code {
     user-select: none;
 }
 
-.channel_header h1 span {
-    color: #424242;
-    margin: 0 0.8em;
-}
-
 .thumbnail {
     width: 250px;
     min-height: 141px;

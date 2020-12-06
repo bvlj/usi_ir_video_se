@@ -35,6 +35,7 @@ export const channelsList = [
         topics: [
             "health",
             "fitness",
+            "medic",
         ],
         exclude: [],
     },
@@ -105,7 +106,6 @@ export const channelsList = [
             "biologi",
             "energi",
             "space",
-            "medic",
             "physic",
         ],
         exclude: [],
@@ -117,7 +117,6 @@ export const channelsList = [
         topics: [
             "technolog",
             "comput",
-            "web",
         ],
         exclude: [],
     }
