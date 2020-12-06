@@ -1,24 +1,34 @@
 import axios from "axios";
-import {extract as extractKeyWords} from "keyword-extractor";
+// @ts-ignore - Types are not available
+import {extract as _extractKeywords} from "keyword-extractor";
 
-import {QUERY_BASE_URL, SUGGEST_BASE_URL} from "../config";
-import {channelsList} from "../model/Channels";
+import {channelsList} from "../config/defaultChannels";
+import {queryUrl, suggestUrl} from "../config/urlConfig";
+import {IChannel} from "../model/IChannel";
+import {IVideo} from "../model/IVideo";
+import {firstUpperCase, sanitize} from "../util/string";
 
-const PSEUDO_RELEVANCE_LIMIT = 5
+interface ISuggestion {
+    term: string,
+}
+
+interface IVideoItem {
+    author: string,
+    category: string,
+    image: string,
+    source: string,
+    title: string,
+    url: string,
+}
 
 export default class ChannelPresenter {
 
-    constructor() {
-        this.queryUrl = QUERY_BASE_URL;
-        this.suggestUrl = SUGGEST_BASE_URL;
-    }
-
-    getChannel(link) {
+    getChannel(link: string): IChannel | undefined {
         return channelsList.find(channel => channel.link === link);
     }
 
-    getSuggestions(query) {
-        const url = `${this.suggestUrl}${query}`;
+    getSuggestions(query: string): Promise<string[]> {
+        const url = `${suggestUrl}${query}`;
         return axios.post(url, {}, {})
             .then(res => {
                 if (!res.data || !res.data.suggest ||
@@ -27,29 +37,34 @@ export default class ChannelPresenter {
                 }
                 const suggester = res.data.suggest.mainSuggester;
                 const keys = Object.keys(suggester);
-                if (keys.length === 0 || !suggester[keys].suggestions) {
+                if (keys.length === 0) {
+                    throw Error();
+                }
+                // @ts-ignore
+                const suggestions: ISuggestion[] = suggester[keys].suggestions;
+                if (!suggestions) {
                     throw Error();
                 }
                 const queryLc = query.replaceAll(" ", "").toLowerCase();
-                return suggester[keys].suggestions.map(it => this.sanitize(it.term))
+                return suggestions.map(it => sanitize(it.term))
                     .filter(it => it.replaceAll(" ", "").toLowerCase() !== queryLc);
-            })
-            .catch(err => {
-                console.error(err);
-                return [];
-            })
+            });
     }
 
-    getVideosFromChannel(channel, limit = 400) {
+    getVideosFromChannel(channel: IChannel, limit = 400): Promise<IVideo[]> {
         const topics = channel.topics.map(it => `${it}*`).join(" OR ");
         const exclude = channel.exclude.join(" ");
-        const url = `${this.queryUrl}q=${topics} ${exclude}&rows=${limit}`;
+        const url = `${queryUrl}q=${topics} ${exclude}&rows=${limit}`;
         return this.getVideos(url);
     }
 
-    getVideosFromQuery(queryChannel, limit = 400) {
+    getVideosFromQuery(
+        queryChannel: IChannel,
+        resultsLimit = 400,
+        pseudoRelevanceCount = 5
+    ): Promise<IVideo[]> {
         const query = queryChannel.topics.join(" ");
-        const url = `${this.queryUrl}q=${query}&fl=title&rows=${PSEUDO_RELEVANCE_LIMIT}`;
+        const url = `${queryUrl}q=${query}&fl=title&rows=${pseudoRelevanceCount}`;
 
         return axios.post(url, {}, {})
             .then(res => {
@@ -57,24 +72,20 @@ export default class ChannelPresenter {
                     !res.data.response.docs) {
                     throw Error()
                 }
-                return this.getRelevantVideos(res.data.response.docs, queryChannel.exclude, limit);
-            })
-            .catch(err => {
-                console.error(err);
-                return [];
+                return this.getRelevantVideos(res.data.response.docs, queryChannel.exclude, resultsLimit);
             });
     }
 
-    getRelevantVideos(originalResults, excludeList, limit) {
+    private getRelevantVideos(originalResults: IVideo[], excludeList: string[], limit: number): Promise<IVideo[]> {
         const keywords = this.extractKeywords(originalResults.map(video => video.title))
             .slice(0, 8)
             .join(" ");
         const excluded = excludeList.join(" ");
-        const url = `${this.queryUrl}q=${keywords} ${excluded}&rows=${limit}`;
+        const url = `${queryUrl}q=${keywords} ${excluded}&rows=${limit}`;
         return this.getVideos(url);
     }
 
-    getVideos(url) {
+    private getVideos(url: string): Promise<IVideo[]> {
         return axios.post(url, {}, {})
             .then(res => {
                 if (!res.data || !res.data.response ||
@@ -82,36 +93,31 @@ export default class ChannelPresenter {
                     throw Error()
                 }
                 return this.extractVideos(res.data.response.docs);
-            })
-            .catch(err => {
-                console.error(err);
-                return [];
             });
     }
 
-    extractVideos = (list) => {
-        const obj = {};
+    private extractVideos(list: IVideoItem[]): IVideo[] {
+        const obj: any = {};
         // Convert and make unique by "title+author" (some videos may appear multiple times)
         list.forEach(it => {
-            const video = {
+            const video: IVideo = {
                 author: it.author ? it.author : "",
                 image: it.image,
-                source: this.firstUpperCase(this.sanitize(it.source)),
+                source: firstUpperCase(sanitize(it.source)),
                 title: it.title,
-                topic: this.firstUpperCase(this.sanitize(it.category)),
+                topic: firstUpperCase(sanitize(it.category)),
                 url: it.url,
             };
             const key = video.title + video.author
             if (!obj[key]) {
                 obj[key] = video;
             }
-        })
-
+        });
         return Object.values(obj);
     }
 
-    extractKeywords = (titles) => {
-        return extractKeyWords(
+    private extractKeywords = (titles: string[]): string[] => {
+        return _extractKeywords(
             titles.join(". "),
             {
                 language: "english",
@@ -119,13 +125,5 @@ export default class ChannelPresenter {
                 remove_duplicates: true,
             }
         )
-    }
-
-    sanitize = (str) => {
-        return str.replaceAll(/_|-|(\+)/g, " ")
-    }
-
-    firstUpperCase = (str) => {
-        return str.substring(0, 1).toUpperCase() + str.substring(1, str.length).toLowerCase();
     }
 }

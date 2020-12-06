@@ -2,12 +2,13 @@ import {useEffect, useState} from 'react';
 
 import ChannelsList from "./components/ChannelsList";
 import SearchBar from "./components/SearchBar";
+import {IChannel} from "../model/IChannel";
 import HomePresenter from "../presenter/HomePresenter";
-import {openUrl} from "../util/Navigation";
+import {openUrl} from "../util/navigation";
 
-export default function Home() {
+export default function Home(): JSX.Element {
 
-    const [channels, setChannels] = useState([]);
+    const [channels, setChannels] = useState([] as IChannel[]);
 
     useEffect(() => {
         const presenter = new HomePresenter();

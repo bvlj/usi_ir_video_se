@@ -1,38 +1,29 @@
-export default class ColumnsManager {
+import React from "react";
+import {IColumn} from "@fluentui/react/lib/DetailsList";
 
-    constructor(callback) {
+import {IVideo} from "../../model/IVideo";
+import {copyAndSort} from "../../util/collection";
+
+interface IColumnsManagerData {
+    columns: IColumn[],
+    items: IVideo[],
+}
+
+type ColumnsManagerCallback = {
+    updateData: (data: IColumnsManagerData) => void,
+    getData: () => IColumnsManagerData,
+};
+
+export default class ColumnsManager {
+    private readonly updateData: (data: IColumnsManagerData) => void;
+    private readonly getCurrentData: () => IColumnsManagerData;
+
+    constructor(callback: ColumnsManagerCallback) {
         this.updateData = callback.updateData;
         this.getCurrentData = callback.getData;
     }
 
-    // noinspection JSPrimitiveTypeWrapperUsage
-    onColumnClick = (ev, column) => {
-        const {columns, items} = this.getCurrentData();
-        const newColumns = columns.slice();
-        const currColumn = newColumns.filter(currCol => column.key === currCol.key)[0];
-        newColumns.forEach(newCol => {
-            if (newCol === currColumn) {
-                currColumn.isSortedDescending = !currColumn.isSortedDescending;
-                currColumn.isSorted = true;
-            } else {
-                newCol.isSorted = false;
-                newCol.isSortedDescending = true;
-            }
-        });
-
-        const newItems = this.copyAndSort(items, currColumn.fieldName, currColumn.isSortedDescending);
-        this.updateData({
-            columns: newColumns,
-            items: newItems,
-        });
-    }
-
-    copyAndSort = (items, key, isSortedDescending) => {
-        return items.slice(0).sort((a, b) =>
-            (isSortedDescending ? a[key] < b[key] : a[key] > b[key]) ? 1 : -1);
-    }
-
-    getDefaultColumns() {
+    getDefaultColumns(): IColumn[] {
         return [
             {
                 key: "column0",
@@ -45,7 +36,7 @@ export default class ColumnsManager {
                 isPadded: true,
                 isIconOnly: true,
                 isResizable: false,
-                onRender: (item) => <a href={item.url} target="_blank" rel="noopener noreferrer">
+                onRender: (item: IVideo) => <a href={item.url} target="_blank" rel="noopener noreferrer">
                     <img className="thumbnail" src={item.image} alt={item.title}/>
                 </a>
             },
@@ -97,25 +88,28 @@ export default class ColumnsManager {
                 sortDescendingAriaLabel: "Z - A",
                 onColumnClick: this.onColumnClick,
             },
-            /*
-            {
-                key: "column4",
-                name: "Source",
-                fieldName: "source",
-                ariaLabel: "Video source",
-                minWidth: 50,
-                maxWidth: 100,
-                data: "string",
-                isPadded: true,
-                isRowHeader: true,
-                isSorted: false,
-                isResizable: true,
-                isSortedDescending: false,
-                sortAscendingAriaLabel: "A - Z",
-                sortDescendingAriaLabel: "Z - A",
-                onColumnClick: this.onColumnClick,
-            },
-             */
         ]
+    }
+
+    // noinspection JSPrimitiveTypeWrapperUsage
+    private onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn) => {
+        const {columns, items} = this.getCurrentData();
+        const newColumns = columns.slice();
+        const currColumn = newColumns.filter(currCol => column.key === currCol.key)[0];
+        newColumns.forEach(newCol => {
+            if (newCol === currColumn) {
+                currColumn.isSortedDescending = !currColumn.isSortedDescending;
+                currColumn.isSorted = true;
+            } else {
+                newCol.isSorted = false;
+                newCol.isSortedDescending = true;
+            }
+        });
+
+        const newItems = copyAndSort(items, currColumn.fieldName!, currColumn.isSortedDescending);
+        this.updateData({
+            columns: newColumns,
+            items: newItems,
+        });
     }
 }

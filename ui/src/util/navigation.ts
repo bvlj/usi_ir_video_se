@@ -1,4 +1,4 @@
-export function openUrl(url, newTab = false) {
+export function openUrl(url: string, newTab = false) {
     const a = document.createElement("a");
     a.style.display = "none";
     a.href = url;

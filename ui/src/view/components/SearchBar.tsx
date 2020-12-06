@@ -1,23 +1,29 @@
-import {useState} from 'react';
+import React, {useState} from 'react';
 
 import {PrimaryButton} from '@fluentui/react/lib/Button';
 import {SearchBox} from '@fluentui/react/lib/SearchBox';
 
-export default function SearchBar(props) {
+type SearchBarProps = {
+    hint?: string,
+    value?: string,
+    onSearch: (query: string) => void,
+};
+
+export default function SearchBar(props: SearchBarProps): JSX.Element {
 
     const [hasUserInput, setHasUserInput] = useState(false);
     const [query, setQuery] = useState("");
 
-    const onQueryChanged = (query) => {
+    const onQueryChanged = (query: string) => {
         setHasUserInput(true);
         setQuery(query);
     };
 
     const onSearch = () => {
-        const searchQuery = query.replaceAll(/(\/\/\/)|(\/\/)/g, "/")
-            .replaceAll(/^\/|\/$/g, ""); // begin + end slashes
+        const searchQuery = query.replace(/(\/\/\/)|(\/\/)/g, "/")
+            .replace(/^\/|\/$/g, ""); // begin + end slashes
         props.onSearch(searchQuery);
-    }
+    };
 
     return (
         <div className="horizontal">

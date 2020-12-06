@@ -7,16 +7,27 @@ import {SearchBox} from "@fluentui/react/lib/SearchBox";
 import ChannelPresenter from "../presenter/ChannelPresenter";
 import ColumnsManager from "./channel/ColumnsManager";
 import SearchBar from "./components/SearchBar";
-import {openUrl} from "../util/Navigation";
+import {openUrl} from "../util/navigation";
+import {IVideo} from "../model/IVideo";
+import {IChannel} from "../model/IChannel";
 
-export default function Channel(props) {
+type NavigationParams = {
+    query: string,
+    filter?: string,
+};
+
+type ChannelProps = {
+    match: { params: NavigationParams },
+};
+
+export default function Channel(props: ChannelProps) {
     const presenter = useMemo(() => new ChannelPresenter(), []);
-    const [channel, setChannel] = useState({name: "", icon: ""});
+    const [channel, setChannel] = useState({name: "", icon: ""} as IChannel);
     const [filter, setFilter] = useState("");
-    const [suggestions, setSuggestions] = useState([]);
-    const [videos, setVideos] = useState([]);
+    const [suggestions, setSuggestions] = useState([] as string[]);
+    const [videos, setVideos] = useState([] as IVideo[]);
 
-    const columnManager = new ColumnsManager({
+    const columnManager: ColumnsManager = new ColumnsManager({
         updateData: (data) => {
             setColumns(data.columns);
             setVideos(data.items);
@@ -30,20 +41,19 @@ export default function Channel(props) {
     useEffect(() => {
         const {match: {params}} = props;
         const {query, filter} = params;
-        setFilter(filter);
+        setFilter(filter || "");
 
         const channel = presenter.getChannel(query);
         if (channel) {
+            setChannel(channel);
             presenter.getVideosFromChannel(channel)
-                .then(videos => {
-                    setChannel(channel);
-                    setVideos(videos);
-                });
+                .then(setVideos)
+                .catch(console.error);
         } else {
-            const topics = [];
-            const exclude = [];
+            const topics = [] as string[];
+            const exclude = [] as string[];
             query.split(" ").forEach(it => it.match(/^-.*/) ? exclude.push(it) : topics.push(it));
-            const queryChannel = {
+            const queryChannel: IChannel = {
                 name: query,
                 icon: "/icons/video.svg",
                 topics: topics,
@@ -51,13 +61,15 @@ export default function Channel(props) {
             };
             setChannel(queryChannel);
             presenter.getVideosFromQuery(queryChannel)
-                .then(setVideos);
+                .then(setVideos)
+                .catch(console.error);
             presenter.getSuggestions(query)
-                .then(setSuggestions);
+                .then(setSuggestions)
+                .catch(console.error);
         }
     }, [presenter, props]);
 
-    const filterItems = (items) => {
+    const filterItems = (items: IVideo[]): IVideo[] => {
         if (filter === "") {
             return items;
         }
@@ -71,7 +83,7 @@ export default function Channel(props) {
             <div className="centered_container">
 
                 <SearchBar
-                    placeholder="Find more videos"
+                    hint="Find more videos"
                     onSearch={(query) => openUrl(`/${query}`)}/>
 
                 <div

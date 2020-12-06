@@ -1,4 +1,6 @@
-export const channelsList = [
+import {IChannel} from "../model/IChannel";
+
+export const channelsList: IChannel[] = [
     {
         link: "a",
         name: "Art",

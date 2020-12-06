@@ -1,18 +1,19 @@
 import {useEffect, useState} from 'react';
 
-import FourZeroFourPresenter from "../presenter/FourZeroFourPresenter";
 import ChannelsList from "./components/ChannelsList";
 import SearchBar from "./components/SearchBar";
-import {openUrl} from "../util/Navigation";
+import {IChannel} from "../model/IChannel";
+import FourZeroFourPresenter from "../presenter/FourZeroFourPresenter";
+import {openUrl} from "../util/navigation";
 
-export default function FourZeroFour() {
+export default function FourZeroFour(): JSX.Element {
 
-    const [suggestions, setSuggestions] = useState([]);
+    const [suggestedChannels, setSuggestedChannels] = useState([] as IChannel[]);
 
     useEffect(() => {
         const presenter = new FourZeroFourPresenter();
         const suggestions = presenter.getSuggestions();
-        setSuggestions(suggestions);
+        setSuggestedChannels(suggestions);
     }, []);
 
     return (
@@ -29,7 +30,7 @@ export default function FourZeroFour() {
             <h2>Or find some inspiration:</h2>
 
             <ChannelsList
-                channels={suggestions}/>
+                channels={suggestedChannels}/>
         </div>
     )
 }

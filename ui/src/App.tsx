@@ -5,7 +5,7 @@ import Channel from "./view/Channel";
 import FourZeroFour from "./view/FourZeroFour";
 import Home from "./view/Home";
 
-export default function App() {
+export default function App(): JSX.Element {
 
     initializeIcons()
 

@@ -1,7 +1,14 @@
+import React from 'react';
 import {FocusZone} from '@fluentui/react/lib/FocusZone';
 import {Link} from '@fluentui/react/lib/Link';
 
-export default function ChannelsList(props) {
+import {IChannel} from "../../model/IChannel";
+
+type ChannelsListProps = {
+    channels: IChannel[],
+};
+
+export default function ChannelsList(props: ChannelsListProps): JSX.Element {
 
     return (
         <FocusZone>
