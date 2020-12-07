@@ -101,7 +101,7 @@ export default class ChannelPresenter {
         // Convert and make unique by "title+author" (some videos may appear multiple times)
         list.forEach(it => {
             const video: IVideo = {
-                author: it.author ? it.author : "",
+                author: it.author && it.author.length > 0 ? it.author[0] : "",
                 image: it.image,
                 source: firstUpperCase(sanitize(it.source)),
                 title: it.title,

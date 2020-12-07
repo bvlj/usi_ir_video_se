@@ -1,16 +1,14 @@
-import {useEffect, useMemo, useState} from 'react';
-
-import {DetailsList, DetailsListLayoutMode, SelectionMode,} from '@fluentui/react/lib/DetailsList';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Link} from "@fluentui/react/lib/Link";
 import {SearchBox} from "@fluentui/react/lib/SearchBox";
 import {TeachingBubble} from '@fluentui/react/lib/TeachingBubble';
 
 import ChannelPresenter from "../presenter/ChannelPresenter";
-import ColumnsManager from "./channel/ColumnsManager";
 import SearchBar from "./components/SearchBar";
 import {openUrl} from "../util/navigation";
 import {IVideo} from "../model/IVideo";
 import {IChannel} from "../model/IChannel";
+import VideoList from "./components/VideoList";
 
 type NavigationParams = {
     query: string,
@@ -32,7 +30,7 @@ const TEACHING_HINTS: TeachingData[] = [
         targetId: "#filter_bar",
         title: "Filter",
         content: (
-            <p>Filter the results by title, author or topic</p>
+            <p>Looking for something in particular? Filter the results by title, author or topic</p>
         ),
     },
     {
@@ -63,16 +61,22 @@ export default function Channel(props: ChannelProps) {
     const [userSearch, setUserSearch] = useState("");
     const [videos, setVideos] = useState([] as IVideo[]);
 
-    const columnManager: ColumnsManager = new ColumnsManager({
-        updateData: (data) => {
-            setColumns(data.columns);
-            setVideos(data.items);
-        },
-        getData: () => {
-            return {columns: columns, items: videos}
-        },
-    });
-    const [columns, setColumns] = useState(columnManager.getDefaultColumns());
+    const onTeachingDone = (currentValue: number) => {
+        if (currentValue >= TEACHING_HINTS.length) {
+            return;
+        }
+        const newValue = currentValue + 1;
+        localStorage.setItem("channel_teaching", newValue.toString())
+        setTeachingBubble(newValue);
+    };
+
+    const filterItems = (items: IVideo[]): IVideo[] => {
+        if (filter === "") {
+            return items;
+        }
+        const regex = new RegExp(filter, "i");
+        return items.filter(it => regex.test(it.title) || regex.test(it.topic) || regex.test(it.author));
+    };
 
     useEffect(() => {
         const {match: {params}} = props;
@@ -105,25 +109,8 @@ export default function Channel(props: ChannelProps) {
                 .catch(console.error);
         }
 
-        setTeachingBubble(parseInt(localStorage.getItem("channel_teaching") || "0"))
+        setTeachingBubble(parseInt(localStorage.getItem("channel_teaching") || "0"));
     }, [presenter, props]);
-
-    const filterItems = (items: IVideo[]): IVideo[] => {
-        if (filter === "") {
-            return items;
-        }
-        const regex = new RegExp(filter, "i");
-        return items.filter(it => regex.test(it.title) || regex.test(it.topic) || regex.test(it.author));
-    };
-
-    const onTeachingDone = (currentValue: number) => {
-        if (currentValue >= TEACHING_HINTS.length) {
-            return;
-        }
-        const newValue = currentValue + 1;
-        localStorage.setItem("channel_teaching", newValue.toString())
-        setTeachingBubble(newValue);
-    };
 
     const items = filterItems(videos);
     return (
@@ -162,14 +149,7 @@ export default function Channel(props: ChannelProps) {
                         <h2>Oh no!</h2>
                         <p>Couldn't find any result for /{channel.link || channel.name}/{filter}</p>
                     </div> :
-                    <DetailsList
-                        items={items}
-                        columns={columns}
-                        isHeaderVisible={true}
-                        layoutMode={DetailsListLayoutMode.justified}
-                        onItemInvoked={(item) => openUrl(item.url, true)}
-                        selectionMode={SelectionMode.none}
-                        setKey="multiple"/>
+                    <VideoList videos={items}/>
             }
 
             <div className="centered_container">
@@ -191,7 +171,7 @@ export default function Channel(props: ChannelProps) {
             </div>
 
             {
-                teachingBubble < TEACHING_HINTS.length &&
+                items.length > 0 && teachingBubble < TEACHING_HINTS.length &&
                 <TeachingBubble
                     closeButtonAriaLabel="Close"
                     footerContent={`${teachingBubble + 1} of ${TEACHING_HINTS.length}`}
