@@ -1,5 +1,5 @@
 export interface IChannel {
-    link?: string,
+    link: string,
     name: string,
     icon: string,
     topics: string[],

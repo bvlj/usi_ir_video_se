@@ -4,6 +4,7 @@ import {PrimaryButton} from '@fluentui/react/lib/Button';
 import {SearchBox} from '@fluentui/react/lib/SearchBox';
 
 type SearchBarProps = {
+    id?: string,
     hint?: string,
     value?: string,
     onSearch: (query: string) => void,
@@ -28,6 +29,7 @@ export default function SearchBar(props: SearchBarProps): JSX.Element {
     return (
         <div className="horizontal">
             <SearchBox
+                id={props.id}
                 className="search_bar"
                 placeholder={props.hint}
                 value={hasUserInput ? query : props.value}
