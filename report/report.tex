@@ -2,16 +2,41 @@
 
 \usepackage{amsmath}
 \usepackage{enumitem}
-\usepackage[margin=2.5cm]{geometry}
+\usepackage[margin=2.25cm]{geometry}
 \usepackage{graphicx}
+\usepackage[bookmarksopen, bookmarksdepth=2]{hyperref}
 \usepackage{listings}
 \usepackage{tikz}
 \usepackage{titling}
+\usepackage{xcolor}
 
+\newcommand{\lp}{\left(}
+\newcommand{\rp}{\right)}
+
+\newcommand{\todo}[1]{{
+\color{red} \textbf{TODO}: {#1} \\
+}}
+
+\newcommand{\smallpic}[1]{
+\includegraphics[width=0.4\textwidth]{img/#1}
+}
+
+\newcommand{\pic}[2]{{
+\begin{center}
+\includegraphics[width=0.65\textwidth]{img/#1} \\
+{#2}
+\end{center}
+}}
 
 \lstset{
 basicstyle=\ttfamily\footnotesize,
 breaklines=true
+}
+\hypersetup{
+colorlinks=true,
+linkcolor=black,
+filecolor=cyan,
+urlcolor=blue,
 }
 
 \makeindex
@@ -19,7 +44,9 @@ breaklines=true
 \setlength{\droptitle}{-5em}
 
 \title{
-\protect\textbf{Assignment 1}
+{\protect\includegraphics[width=\textwidth]{logo-info.pdf}}
+\protect\textbf{Information Retrieval Course Project Report}\\
+\protect Video Search Engine
 }
 
 \author{Bevilacqua Joey}
@@ -31,5 +58,247 @@ breaklines=true
 
 \maketitle
 
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+
+\subsection{Requirements}
+
+The Information Retrieval Course project required to build a search engine
+that allows users to search for videos by submitting some keywords. 
+The search engine shall provide the user an interface for searching, browsing
+and presenting the results. One last requirement that was given for this
+project is that the results of the search engine would be given using
+Pseudo Relevance Feedback.
+
+\subsection{The challenges}
+
+This project turned out challenging due to the different sources the
+indexed videos come from: websites that were crawled are built with different
+technologies and required the development of different approaches to extract
+the information that was needed.
+
+Providing a good user interface was also challenging: videos are not simply
+representable without lots of graphical content that can become overwhelming
+pretty fast, especially when a lot of results are presented, the right amount
+of graphics and textual information had to be correctly placed in order to
+keep the user comfortable and make the search experience enjoyable.
+
+\subsection{The result}
+
+The search engine that was built is called \textit{Ok Video}: it allows
+users to easily discover new videos from different sources with a simple
+focused user interface.
+
+\pic{se_home}{The \textit{Ok Video} home page}
+
+\newpage
+
+\section{Crawling \& Indexing}
+
+To find videos and make them available to users using the search engine
+three powerful tools were used: \textit{Scrapy}, \textit{Selenium}
+and \textit{Solr}.
+
+The first two were used to crawl for videos on various sources while
+\textit{Solr} was used to index data and provide a ``search API''.
+
+\subsection{Crawling}
+
+The following websites were crawled to fetch videos for the search
+engine: \href{https://talksat.withgoogle.com}{Talks at Google},
+\href{https://www.ted.com}{Ted.com}, \href{https://www.thersa.org}{The RSA} and
+\href{https://vimeo.com}{Vimeo}. \\
+
+To crawl \textit{Talks at Google}, \textit{Ted.com} and \textit{The RSA}
+\textit{Scrapy} was used. \textit{Scrapy} is a simple and fast framework to
+build web spiders and can process multiple webpages synchronously.
+\textit{Vimeo}, on the other hand did not work with \textit{Scrapy} due to its
+reliance on \textit{JavaScript} code to present content, while \textit{Scrapy}
+has no \textit{JavaScript} engine to process said code. \\
+
+To solve this problem \textit{Selenium WebDriver} was used instead:
+\textit{Selenium WebDriver} is a powerful web browser automation tool,
+often used for website testing and automation-guided exploration. This powerful
+tool was used to take control of a headless Firefox instance and use it to
+visit (and crawl) \textit{Vimeo}. This allowed to let the \textit{Vimeo}
+website make use of its \textit{JavaScript} code while still allowing us to
+have a \textit{Scrapy}-like tool to crawl and extract information from it.
+
+The crawling of each website has been automated as a python script that
+produced \texttt{json} files with the crawled data.
+
+\subsection{Indexing}
+
+\textit{Apache Solr} is a popular, powerful and open source search platform
+that allows to easily create a search system that has powerful matching
+capabilities including phrases, wildcards, joins, grouping and much more
+across any data type. \\
+
+The \texttt{json} outputs of the web crawlers were the posted to
+an appositely created \textit{Solr collection} so that they could be served
+as search results in the search engine.
+
+The collection was specified to have this schema (in addition to the default
+configuration):
+
+\begin{center}
+\begin{tabular}{lll}
+Field name & Type          & Description                \\\hline
+author     & text\_general & Video author               \\
+category   & string        & Video category / topic     \\
+image      & string        & Video preview image url    \\
+source     & string        & Video website source       \\
+title      & text\_en      & Video title                \\
+url        & string        & Video url                  \\\hline
+\_text\_   & text\_general & Copy field used for search \\
+\end{tabular}
+\end{center}
+
+\newpage
+
+\section{The user interface}
+
+The search engine has a graphical user interface accessible from a web
+browser as one would expect from an usual search engine that provides
+access to other resources on the web.
+
+The user interface is written in TypeScript and uses React, a JavaScript
+framework that allows declarative user interfaces.
+
+\subsection{The homepage}
+
+\pic{se_home}{The HomePage}
+
+The homepage is composed of a limited number of elements: at the very
+top we have the website title, a search bar and some \textit{Channels}.
+
+Channels are collections of videos that can be easily accessed through
+simple shortcuts.
+
+\subsection{Searching}
+
+\pic{se_query}{The results of the query \textit{Quantum computers}}
+
+By inserting a query in the search bar we can search for videos.
+The results are presented using the pseudo-relevance-feedback technique:
+first the user query is sent to Solr, which will then return five (5) 
+results for the original user query. The system then reads the five (5)
+titles of the results and extracts keywords from them using a simple
+NLP prebuilt model. These keywords are then sent back to Solr which will
+return the complete list of videos that will be shown to the user as the
+result of the query.
+
+\subsection{Channels}
+
+\pic{se_channel}{The \textit{food} channel (\texttt{f})}
+
+Channels provide a simple way to access collections of videos pertaining
+to certain topics. Channels are system-generated and users cannot add
+their own channels, even if it'd be an interesting feature to develop if
+the search engine were to be expanded.
+
+Channels can be easily queried for using a shortcut character in the search
+bar or by clicking on them in the home page.
+
+\subsection*{Channel shortcuts}
+
+By inserting the shortcut character in the search bar, will show the channel
+rather than results of the query for that character.
+
+\begin{center}
+\begin{tabular}{ll|ll|ll}
+Channel & Shortcut & Channel & Shortcut & Channel & Shortcut \\\hline
+Art               & a & Economy           & e & Food               & f \\
+Health \& Fitness & h & Literature        & l & News \& Journalism & j \\
+Music             & m & Animals \& Nature & n & Sports             & o \\
+Politics          & p & Science           & s & Technology         & g \\
+\end{tabular}
+\end{center}
+
+\subsection{Filtering}
+
+\pic{se_filter}{
+Results for the query \textit{geopolitics}, filtered for \textit{Gilles Kepel}
+}
+
+It is possible to filter the search results using the filter bar or by
+appending a slash ( \texttt{/} ) after the user query. The filter will
+then allow you to shown only results containing the filter string in the
+title, author name or topic name.
+
+Searching for \texttt{geopolitics/Gilles Kepel} will yield the same result as
+searching for \textit{geopolitics} and then inserting \textit{Gilles Kepel} in
+the filter bar.
+
+Filtering works on Channels too, so searching for \texttt{a/paintings} will
+show the Art channel with the filter \textit{paintings} applied.
+
+\subsection{Advanced features}
+
+The search engine's user interface was built to be pretty simple and clean,
+but there exist more features for expert users who may want to tune their
+search results to obtain the information that they need faster and more
+efficiently.
+
+\subsubsection{Results exclusion}
+
+\begin{center}
+\begin{tabular}{cc}
+\smallpic{se_search} & \smallpic{se_exclude}
+\end{tabular} \\
+Search results are different when we exclude the word ``Chris''\\
+(name of author of the first video in the results on the left).
+\end{center}
+
+By pre-pending a dash ( \texttt{-} ) to a word, we can explicitly exclude
+it from the search results. This exclusion is applied after the 
+pseudo-relevance-feedback process so that we ensure final results do not
+include what the user is not looking for.
+
+\subsubsection{Results sorting}
+
+\pic{se_sorting}{Search results are sorted by Author in alphabetic order}
+
+It's possible to sort videos by title, author or topic in alphabetic 
+or reverse alphabetic order by clicking on the title of the column.
+
+\subsection{OnBoarding}
+
+\pic{se_onboarding}{
+The \textit{Teaching popup} explains the filter bar to the user
+}
+
+While most of the user interface is self-explanatory, more advanced features
+might be harder to discover without seeing someone else using them or
+reading about them in a documentation.
+
+That's why there exists a \textit{Teaching popup} that will appear at the
+right time to explain how users can improve their searching experience with
+quick tips and concrete examples.
+
+\subsection{404 - Not found}
+
+\pic{se_fourzerofour}{The \textit{404} page}
+
+When trying to access a link that's not available (anymore), the
+user will be presented a friendly user interface with inspiration
+for some channels to watch a video from.
+
+\newpage
+
+\section{User evaluations}
+
+\todo{Missing user evaluations}
+
+\subsection{User A}
+
+\subsection{User B}
+
+\subsection{User C}
+
+\subsection{User D}
 
 \end{document}
