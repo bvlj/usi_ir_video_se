@@ -1224,7 +1224,6 @@
      <transformer name="qecBooster" class="org.apache.solr.response.transform.EditorialMarkerFactory" />
     -->
 
-
   <!-- Suggestions -->
   <searchComponent name="suggest" class="solr.SuggestComponent">
     <lst name="suggester">
