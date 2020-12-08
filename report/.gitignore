@@ -1,6 +1,7 @@
 ._DS_Store
 .DS_Store
 *.pdf
+!logo-info.pdf
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

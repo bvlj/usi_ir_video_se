@@ -144,8 +144,12 @@ cython_debug/
 /crawler/geckodriver*
 
 # Results
-*.json
 crawler/*.json
+data/*.json
+!data/google.json
+!data/rsa.json
+!data/ted.json
+!data/vimeo.json
 
 # Mac
 .DS_Store

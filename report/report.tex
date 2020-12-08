@@ -1,4 +1,4 @@
-\documentclass[12pt,numbers=enddot]{exam}
+\documentclass[12pt]{exam}
 
 \usepackage{amsmath}
 \usepackage{enumitem}
@@ -13,8 +13,12 @@
 \newcommand{\lp}{\left(}
 \newcommand{\rp}{\right)}
 
+\newcommand{\n}[0]{
+\hspace*{\fill}
+}
+
 \newcommand{\todo}[1]{{
-\color{red} \textbf{TODO}: {#1} \\
+\color{red} \textbf{TODO}: {#1} \n
 }}
 
 \newcommand{\smallpic}[1]{
@@ -23,7 +27,7 @@
 
 \newcommand{\pic}[2]{{
 \begin{center}
-\includegraphics[width=0.65\textwidth]{img/#1} \\
+\includegraphics[width=0.6\textwidth]{img/#1} \\
 {#2}
 \end{center}
 }}
@@ -45,7 +49,7 @@ urlcolor=blue,
 
 \title{
 {\protect\includegraphics[width=\textwidth]{logo-info.pdf}}
-\protect\textbf{Information Retrieval Course Project Report}\\
+\protect\textbf{Information Retrieval Course Project Report}\n
 \protect Video Search Engine
 }
 
@@ -110,14 +114,14 @@ The first two were used to crawl for videos on various sources while
 The following websites were crawled to fetch videos for the search
 engine: \href{https://talksat.withgoogle.com}{Talks at Google},
 \href{https://www.ted.com}{Ted.com}, \href{https://www.thersa.org}{The RSA} and
-\href{https://vimeo.com}{Vimeo}. \\
+\href{https://vimeo.com}{Vimeo}. \n
 
 To crawl \textit{Talks at Google}, \textit{Ted.com} and \textit{The RSA}
 \textit{Scrapy} was used. \textit{Scrapy} is a simple and fast framework to
 build web spiders and can process multiple webpages synchronously.
 \textit{Vimeo}, on the other hand did not work with \textit{Scrapy} due to its
 reliance on \textit{JavaScript} code to present content, while \textit{Scrapy}
-has no \textit{JavaScript} engine to process said code. \\
+has no \textit{JavaScript} engine to process said code. \n
 
 To solve this problem \textit{Selenium WebDriver} was used instead:
 \textit{Selenium WebDriver} is a powerful web browser automation tool,
@@ -135,7 +139,7 @@ produced \texttt{json} files with the crawled data.
 \textit{Apache Solr} is a popular, powerful and open source search platform
 that allows to easily create a search system that has powerful matching
 capabilities including phrases, wildcards, joins, grouping and much more
-across any data type. \\
+across any data type. \n
 
 The \texttt{json} outputs of the web crawlers were the posted to
 an appositely created \textit{Solr collection} so that they could be served
@@ -175,9 +179,6 @@ framework that allows declarative user interfaces.
 The homepage is composed of a limited number of elements: at the very
 top we have the website title, a search bar and some \textit{Channels}.
 
-Channels are collections of videos that can be easily accessed through
-simple shortcuts.
-
 \subsection{Searching}
 
 \pic{se_query}{The results of the query \textit{Quantum computers}}
@@ -186,10 +187,24 @@ By inserting a query in the search bar we can search for videos.
 The results are presented using the pseudo-relevance-feedback technique:
 first the user query is sent to Solr, which will then return five (5) 
 results for the original user query. The system then reads the five (5)
-titles of the results and extracts keywords from them using a simple
-NLP prebuilt model. These keywords are then sent back to Solr which will
-return the complete list of videos that will be shown to the user as the
-result of the query.
+titles of the results and computes the td-idf for each word, and then we take
+the top five (5) words and add it to the original query.
+
+The formula that was used to perform the pseudo-relevance-feedback is the
+following:
+
+$$
+tfidf \lp t, d, C \rp = tf \lp t, d \rp \times idf \lp t, C \rp
+$$
+$$
+tf = \dfrac{N}{1 + \left\{ d \in C : t \in d \right\}}
+$$
+$$
+idf = log \lp \dfrac{N}{1 + \left\{ d \in C : t \in d \right\}} \rp
+$$
+
+These keywords are then sent back to Solr which will return the complete list
+of videos that will be shown to the user as the result of the query.
 
 \subsection{Channels}
 
@@ -248,8 +263,8 @@ efficiently.
 \begin{center}
 \begin{tabular}{cc}
 \smallpic{se_search} & \smallpic{se_exclude}
-\end{tabular} \\
-Search results are different when we exclude the word ``Chris''\\
+\end{tabular} \n
+Search results are different when we exclude the word ``Chris''\n
 (name of author of the first video in the results on the left).
 \end{center}
 
@@ -291,14 +306,91 @@ for some channels to watch a video from.
 
 \section{User evaluations}
 
-\todo{Missing user evaluations}
+The user evaluation consisted in three (3) different users
+testing the search engine on their own machine in a comfortable and
+familiar environment. Users were asked to answer some background-check
+questions, perform a number of predefined task and finally to let them play
+around with the system by performing any number of queries they'd have liked.
 
+This approach allowed to perform a more complete evaluation of the system by
+having a bit of ``operational evaluation'' with the limitation that users could
+not use their own collection.
+
+Here are the predefined tasks users were asked to perform for the evaluation:
+
+\begin{enumerate}
+\item Find videos about "Quantum Computing"
+\item Find videos about "Internet trolls" that contain the word "inside" 
+      in their title
+\item Find videos about "Geopolitics" and sort them by author name
+\end{enumerate}
 \subsection{User A}
+
+User A has good background knowledge of search engines and is also used to
+searching videos on the internet using various search engines and video hosting
+platforms.
+
+User A appreciated the style of the user interface but, even if the
+filter text box was found useful, the slash feature in the search bar for
+automatic filtering was found a bit hard to grasp at the beginning. Channels
+were seen as an interesting idea that could be expanded with even more options
+and contents.
+
+User A suggested to implement another \textit{Teaching bubble} (which was
+much appreciated for its style and interesting tips) for sorting videos, as it
+was said that it might not be clear to more less experienced users that it is
+possible to sort by clicking on the results headers.
+
+User A finally suggested to add a ``back arrow'' / ``home button'' to let
+users easily go back to the main homepage of the search engine.
 
 \subsection{User B}
 
+User B has good background knowledge of search engines and is also used to
+searching videos on the internet using various search engines and video hosting
+platforms.
+
+User B appreciated very much the user interface but found that some results
+were not ``literally matching'' the query that was given to the system. This
+happened due to the pseudo-relevance-feedback that modified the query as it was
+expected to do: nonetheless this is a signal that the pseudo-relevance-feedback
+implementation is not perfect, which is understandable due to the usage of a
+prebuilt general-purpose NLP model.
+
+User B did not make use of filters even when hinted to do so in tasks. Channels
+were also ignored for the majority of the evaluation, only being used at the
+very end instead of performing a simple query, but they made a good impression
+thanks to satisfactory results.
+
 \subsection{User C}
 
-\subsection{User D}
+User C has good background knowledge of search engines and is also used to
+searching videos on the internet using various search engines and video hosting
+platforms.
+
+User C appreciated the user interface and when User C read the onboarding
+\textit{Teaching popup}s, immediately fell in love with filters and Channels
+functionality which allowed User C to perform tasks by writing better queries.
+User C said that this feature was conceptually similar to the
+DuckDuckGo's Bangs.
+
+User C suggested to expand the filters and channels functionalities by 
+integrating the ``topic'' field of videos and providing ways to group even more
+contents in channels.
+
+\subsection{Conclusion}
+
+The three (3) user evaluation highlighted different strengths and weaknesses
+of this implementation, providing many insights for future improvements:
+
+\begin{itemize}
+\item More teaching bubbles to help more \textit{novice} users know about
+      advanced features.
+\item Clearer ``back home'' navigation.
+\item Improvements to the quality of the pseudo-relevance-feedback
+      implementation.
+\item Expansion of the Channels to include even more (if not all) topics
+      for a better organized search experience for advanced users.
+\end{itemize}
 
 \end{document}
