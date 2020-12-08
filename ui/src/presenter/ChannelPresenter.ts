@@ -1,12 +1,11 @@
 import axios from "axios";
-// @ts-ignore - Types are not available
-import {extract as _extractKeywords} from "keyword-extractor";
 
 import {channelsList} from "../config/defaultChannels";
 import {queryUrl, suggestUrl} from "../config/urlConfig";
 import {IChannel} from "../model/IChannel";
 import {IVideo} from "../model/IVideo";
 import {firstUpperCase, sanitize} from "../util/string";
+import {getExpandedQuery} from "../util/prf";
 
 interface ISuggestion {
     term: string,
@@ -72,16 +71,15 @@ export default class ChannelPresenter {
                     !res.data.response.docs) {
                     throw Error()
                 }
-                return this.getRelevantVideos(res.data.response.docs, queryChannel.exclude, resultsLimit);
+                return this.getRelevantVideos(res.data.response.docs, query, queryChannel.exclude, resultsLimit);
             });
     }
 
-    private getRelevantVideos(originalResults: IVideo[], excludeList: string[], limit: number): Promise<IVideo[]> {
-        const keywords = this.extractKeywords(originalResults.map(video => video.title))
-            .slice(0, 8)
-            .join(" ");
+    private getRelevantVideos(originalResults: IVideo[], query: string,
+                              excludeList: string[], limit: number): Promise<IVideo[]> {
+        const newQuery = getExpandedQuery(query, originalResults.map(it => it.title));
         const excluded = excludeList.join(" ");
-        const url = `${queryUrl}q=${keywords} ${excluded}&rows=${limit}`;
+        const url = `${queryUrl}q=${newQuery} ${excluded}&rows=${limit}`;
         return this.getVideos(url);
     }
 
@@ -114,16 +112,5 @@ export default class ChannelPresenter {
             }
         });
         return Object.values(obj);
-    }
-
-    private extractKeywords = (titles: string[]): string[] => {
-        return _extractKeywords(
-            titles.join(". "),
-            {
-                language: "english",
-                remove_digits: true,
-                remove_duplicates: true,
-            }
-        )
     }
 }
