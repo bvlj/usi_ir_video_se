@@ -161,6 +161,13 @@ url        & string        & Video url                  \\\hline
 \end{tabular}
 \end{center}
 
+After this, Solr had to be configured to accept cross-origin requests:
+thanks to the documentation, the
+\texttt{server/solr-webapp/webapp/WEB-INF/web.xml} file was modified
+to allow incoming connections from the \textit{ui} project.
+See \href{http://laurenthinoul.com/how-to-enable-cors-in-solr/}{this website}
+for information on how to properly set up your Solr instance to allow CORS.
+
 \newpage
 
 \section{The user interface}

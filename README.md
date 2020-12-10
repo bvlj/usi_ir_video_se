@@ -60,6 +60,10 @@ bin/solr create -c ok_video
 bin/post -c $(path_to_this_repo)/data/*.json
 ```
 
+Make sure to configure the CORS for Solar to allow its usage from
+the ui as described in this website
+[here](http://laurenthinoul.com/how-to-enable-cors-in-solr/).
+
 #### Solr fields
 
 | Field name | Type                             |
