@@ -206,6 +206,9 @@ $$
 These keywords are then sent back to Solr which will return the complete list
 of videos that will be shown to the user as the result of the query.
 
+Implementation of the pseudo-relevance-feedback \textit{algorithm} can be
+found in this file: \texttt{ui/src/util/prf.ts}.
+
 \subsection{Channels}
 
 \pic{se_channel}{The \textit{food} channel (\texttt{f})}
@@ -263,8 +266,8 @@ efficiently.
 \begin{center}
 \begin{tabular}{cc}
 \smallpic{se_search} & \smallpic{se_exclude}
-\end{tabular} \n
-Search results are different when we exclude the word ``Chris''\n
+\end{tabular} \\
+Search results are different when we exclude the word ``Chris''
 (name of author of the first video in the results on the left).
 \end{center}
 
